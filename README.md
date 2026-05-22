@@ -65,3 +65,11 @@ dotfiles checkout
 # 5. 设置不显示未跟踪文件
 dotfiles config --local status.showUntrackedFiles no
 ```
+
+## System Tools
+
+### cargo
+```bash
+cargo install bat btm duf eza fd-find mwget ripgrep uv zoxide
+```
+
