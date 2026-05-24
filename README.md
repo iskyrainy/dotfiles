@@ -73,3 +73,13 @@ dotfiles config --local status.showUntrackedFiles no
 cargo install bat btm duf eza fd-find mwget ripgrep uv zoxide
 ```
 
+### tmux
+Install `tmux plugin manager` to manage plugins.
+```bash
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
+[tmux prefix] + :
+source-file ~/.tmux.conf
+
+[tmux prefix] + I
+```
