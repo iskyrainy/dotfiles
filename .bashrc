@@ -119,11 +119,15 @@ if ! shopt -oq posix; then
 fi
 
 # go workspace
-if [ -d ~/workspace ]; then
-    cd ~/workspace
+workspace="$HOME/workspace"
+if [ ! -d $workspace ]; then
+    mkdir $workspace
+    cd $workspace
 else
-    mkdir ~/workspace
-    cd ~/workspace
+    cur=$(pwd)
+    if [[ "$cur" != "$workspace"/* && "$cur" != "$workspace" ]]; then
+        cd $workspace
+    fi
 fi
 
 export http_proxy="http://127.0.0.1:10808"
