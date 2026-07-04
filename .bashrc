@@ -118,6 +118,18 @@ if ! shopt -oq posix; then
   fi
 fi
 
+# go workspace
+workspace="$HOME/workspace"
+if [ ! -d $workspace ]; then
+    mkdir $workspace
+    cd $workspace
+else
+    cur=$(pwd)
+    if [[ "$cur" != "$workspace"/* && "$cur" != "$workspace" ]]; then
+        cd $workspace
+    fi
+fi
+
 export http_proxy="http://127.0.0.1:10808"
 export https_proxy="http://127.0.0.1:10808"
 export PATH="$PATH:/opt/nvim/bin"
