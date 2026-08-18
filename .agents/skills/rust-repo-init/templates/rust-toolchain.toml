@@ -1,0 +1,6 @@
+# 固定工具链:所有开发者与 CI 使用同一版本,避免"我这能编译你那边不行"。
+# 需要 nightly 或特定版本时把 channel 改成对应值。
+[toolchain]
+channel = "stable"
+components = ["rustfmt", "clippy"]
+profile = "minimal"

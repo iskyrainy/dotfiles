@@ -1,0 +1,23 @@
+# EditorConfig:https://editorconfig.org
+# 与 rustfmt.toml 对齐:4 空格缩进、LF、utf-8、结尾换行、去行尾空白
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+# YAML / JSON 惯例 2 空格
+[*.{yml,yaml,json}]
+indent_size = 2
+
+# Makefile 必须用 tab
+[Makefile]
+indent_style = tab
+
+# Markdown 行尾空格是换行语法,不去除
+[*.md]
+trim_trailing_whitespace = false

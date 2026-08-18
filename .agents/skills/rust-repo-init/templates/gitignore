@@ -1,0 +1,27 @@
+# ---- Rust / Cargo 构建产物 ----
+/target
+**/*.rs.bk
+
+# Cargo.lock 规则:binary 与 workspace 项目应提交锁文件以保证可复现构建;
+# library 项目通常忽略(下游各自锁定)。按项目形态二选一:
+#   - library 项目:取消下面这行的注释
+# Cargo.lock
+
+# ---- 本地环境 / 密钥 ----
+.env
+.env.*
+!.env.example
+
+# ---- IDE / 编辑器 ----
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ---- 系统文件 ----
+.DS_Store
+Thumbs.db
+
+# ---- 日志 / 临时文件 ----
+*.log

@@ -1,0 +1,23 @@
+# 让 Git 自动识别文本文件、统一行尾
+* text=auto
+
+# 源码与配置一律强制 LF(与 .editorconfig 一致)
+*.rs text eol=lf
+*.toml text eol=lf
+*.md text eol=lf
+Makefile text eol=lf
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+
+# 二进制文件不做任何行尾转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.wasm binary

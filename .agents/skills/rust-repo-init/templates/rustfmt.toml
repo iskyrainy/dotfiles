@@ -1,0 +1,15 @@
+# rustfmt 配置。edition 无需在此指定——rustfmt 自动从 Cargo.toml 读取。
+# 与 .editorconfig 保持对齐:4 空格缩进、LF 行尾、100 列。
+max_width = 100
+use_small_heuristics = "Default"
+use_field_init_shorthand = true
+use_try_shorthand = true
+
+# import 分组:std / 外部 crate / 本地 crate,并按 crate 粒度合并。
+# 注意:这两个选项目前仅 nightly 生效,stable 会忽略并打 warning。
+# 如果项目用 stable,保持注释;若团队用 nightly,可取消注释。
+# imports_granularity = "Crate"
+# group_imports = "StdExternalCrate"
+
+newline_style = "Unix"
+reorder_imports = true
