@@ -1,3 +1,6 @@
 [submodule ".config/nvim"]
 	path = .config/nvim
 	url = git@github.com:iskyrainy/AstroNvimConfig.git
+[submodule ".jenv"]
+	path = .jenv
+	url = https://github.com/jenv/jenv.git

@@ -153,3 +153,5 @@ if [ -f ~/.bashrc.local ]; then
 fi
 
 fortune | cowsay -f tux | lolcat
+export PATH="$HOME/.jenv/bin:$PATH"
+eval "$(jenv init -)"
