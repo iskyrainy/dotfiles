@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Extract Text
+Exec=sh -c "nohup /home/wangnan/.config/spectacle-ocr/run.sh %f >/dev/null 2>&1 &"
+MimeType=image/png;
+Icon=scanner
+Terminal=false
+Type=Application
+Categories=Utility;
+StartupNotify=false
