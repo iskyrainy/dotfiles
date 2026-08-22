@@ -118,6 +118,14 @@ if ! shopt -oq posix; then
   fi
 fi
 
+function y() {
+	local tmp cwd; tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+	command yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd" || builtin true
+	command rm -f -- "$tmp"
+}
+
 # go workspace
 workspace="$HOME/workspace"
 if [ ! -d $workspace ]; then

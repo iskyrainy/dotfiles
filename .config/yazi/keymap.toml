@@ -1,0 +1,12 @@
+[[mgr.prepend_keymap]]
+on = "e"
+run = '''
+shell --block -- sh -c '
+    if [ -d "$1" ]; then
+        exec nvim "$1"
+    else
+        ya emit open
+    fi
+' sh %h
+'''
+desc = "Open directory with Neovim, or file with Yazi"
