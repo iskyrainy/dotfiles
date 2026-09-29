@@ -91,6 +91,7 @@ fi
 alias ll="eza -lA"
 alias lt="eza -T -L"
 alias l="eza"
+alias c="clear"
 alias find="fd"
 alias cat="bat"
 alias wget="mwget"
