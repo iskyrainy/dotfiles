@@ -1,0 +1,23 @@
+[Desktop Entry]
+Categories=System;TerminalEmulator;
+Comment=Fast, feature-rich, GPU based terminal
+Exec=kitty --start-as maximized
+GenericName=Terminal emulator
+Icon=kitty
+Name=kitty
+NoDisplay=false
+Path=
+PrefersNonDefaultGPU=false
+StartupNotify=true
+Terminal=false
+TerminalOptions=
+TryExec=kitty
+Type=Application
+Version=1.0
+X-KDE-SubstituteUID=false
+X-KDE-Username=
+X-TerminalArgAppId=--class
+X-TerminalArgDir=--working-directory
+X-TerminalArgExec=--
+X-TerminalArgHold=--hold
+X-TerminalArgTitle=--title

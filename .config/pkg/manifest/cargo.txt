@@ -1,0 +1,21 @@
+# pkg-manifest: cargo install 安装的 crate
+# 导出: pkg-manifest export cargo   恢复: pkg-manifest apply cargo
+# 只在本机安装的包请写入 cargo.local（该文件不会被提交）
+bat
+bottom
+cargo-binstall
+cargo-bloat
+cargo-deps
+cargo-fuzz
+cargo-watch
+cross
+duf
+eza
+fd-find
+fnm
+mwget
+ripgrep
+rust_bundler_cp
+sqlx-cli
+uv
+zoxide

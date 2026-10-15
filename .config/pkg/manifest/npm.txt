@@ -1,0 +1,4 @@
+# pkg-manifest: npm -g 全局包（不含 node 自带的 npm/corepack）
+# 导出: pkg-manifest export npm     恢复: pkg-manifest apply npm
+# 只在本机安装的包请写入 npm.local（该文件不会被提交）
+@deepseek-ai/dsh

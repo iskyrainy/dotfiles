@@ -1,0 +1,9 @@
+# pkg-manifest: flatpak 应用，格式为「应用ID<TAB>来源仓库」
+# 导出: pkg-manifest export flatpak 恢复: pkg-manifest apply flatpak
+# 只在本机安装的包请写入 flatpak.local（该文件不会被提交）
+com.dbxio.dbx	flatpark
+com.freerdp.FreeRDP	flathub
+com.getpostman.Postman	flathub
+io.dbeaver.DBeaverCommunity	flathub
+net.xmind.XMind	flathub
+org.mozilla.thunderbird_esr	flathub

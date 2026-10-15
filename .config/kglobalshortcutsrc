@@ -219,6 +219,7 @@ stopmedia=Media Stop,Media Stop,停止媒体播放
 16F8CBF09D153C93FDCC63FFC2330971-Ctrl+Alt+M=none,none,Electron shortcut Ctrl+Alt+M
 22D18156D241A6CE9945288827135ADA-Ctrl+Alt+P=none,none,Electron shortcut Ctrl+Alt+P
 267E4A43324A69AC55A6D0247D18AA3D-Ctrl+Shift+S=none,none,Electron shortcut Ctrl+Shift+S
+27AF6232509337E298DB4F7A11B96F36-electron-accelerator-6291776=,Meta+Alt+P,ChatGPT shortcut: electron-accelerator-6291776
 447B98AB26183E81625FE0ABCE42C947-Ctrl+Alt+Space=none,none,Electron shortcut Ctrl+Alt+Space
 4C7FCC597F849999B7B62683A786B8F3-Ctrl+Alt+Up=none,none,Electron shortcut Ctrl+Alt+Up
 58649146C5CD8A522F5B3065844EA0FF-Ctrl+Alt+D=none,none,Electron shortcut Ctrl+Alt+D

@@ -1,0 +1,190 @@
+# ============================================================================
+# dotfiles ($HOME bare repo) — 只追踪可跨 PC 复用的配置
+# 本文件列出的内容永远不会被 dotfiles 追踪：密钥/凭据 + 仅本机的状态与缓存
+# 注意：gitignore 不支持行尾注释，注释必须独占一行
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# 密钥 / 凭据 / 隐私（绝不追踪）
+# ---------------------------------------------------------------------------
+.bashrc.local
+.ssh/
+.pki/
+.netrc
+.git-credentials
+.docker/config.json
+.cargo/credentials.toml
+.npmrc.local
+.claude.json
+.claude/.credentials.json
+.claude/settings.local.json
+.local/share/keyrings/
+.config/libaccounts-glib/
+.config/EasyConnect/
+.config/opencode/
+.config/kdeconnect/
+.config/gh/
+.codex/
+
+# ---------------------------------------------------------------------------
+# 仅本机的状态 / 历史 / 缓存
+# ---------------------------------------------------------------------------
+.bash_history
+.python_history
+.viminfo
+.wget-hsts
+.sudo_as_admin_successful
+.bifang.doc
+.sys1og.conf
+.cache/
+.local/state/
+.local/share/Trash/
+.local/share/recently-used.xbel
+.local/share/user-places.xbel*
+.cargo/bin/
+.cargo/registry/
+.cargo/git/
+.cargo/.global-cache
+.cargo/.package-cache*
+.claude/backups/
+.claude/cache/
+.claude/file-history/
+.claude/history.jsonl
+.claude/projects/
+.claude/telemetry/
+.claude/todos/
+.claude/statsig/
+.claude/plugins/
+
+# ---------------------------------------------------------------------------
+# 桌面环境 / 硬件相关（分辨率、屏幕布局、键盘鼠标、会话等因机而异）
+# ---------------------------------------------------------------------------
+.config/dconf/
+.config/session/
+.config/xsettingsd/
+.config/kde.org/
+.config/KDE/
+.config/kdedefaults/
+.config/kded5rc
+.config/kconf_updaterc
+.config/kactivitymanagerd*
+.config/kactivitymanagerdrc
+.config/plasma-org.kde.plasma.desktop-appletsrc
+.config/plasma-workspace/
+.config/plasmaparc
+.config/plasmanotifyrc
+.config/plasmashellrc
+.config/plasmarc
+.config/plasma-welcomerc
+.config/plasma.emojierrc
+.config/plasma-localerc
+.config/ksmserverrc
+.config/kscreenlockerrc
+.config/ksplashrc
+.config/kwinrc
+.config/kwinoutputconfig.json
+.config/kglobalshortcutsrc.bak
+.config/powerdevilrc
+.config/powermanagementprofilesrc
+.config/kxkbrc
+.config/kcminputrc
+.config/ktimezonedrc
+.config/ktrashrc
+.config/kalendaracrc
+.config/kioslaverc
+.config/user-dirs.dirs
+.config/user-dirs.locale
+.config/mimeapps.list
+.local/share/applications/mimeapps.list
+.local/share/applications/mimeinfo.cache
+
+# ---------------------------------------------------------------------------
+# 包管理器清单（pkg-manifest）
+# ---------------------------------------------------------------------------
+# <mgr>.local 是「只在本机安装」的排除列表，按设计不进仓库
+.config/pkg/manifest/*.local
+# ~/.local/bin 只跟踪 pkg-manifest，其余（uv/pip 生成的软链等）忽略；
+# 以后新增要同步的脚本，在这里加一行 !.local/bin/<脚本名>
+.local/bin/*
+!.local/bin/pkg-manifest
+
+# ---------------------------------------------------------------------------
+# 第三方 App 的数据目录（非 dotfile 配置）
+# ---------------------------------------------------------------------------
+.config/Codex/
+.config/QQ/
+.config/Mailspring/
+.config/Z-Library/
+.config/chromium/
+.config/marktext/
+.config/moekoemusic/
+.config/obsidian/
+.config/zdxlz-app/
+.config/Kingsoft/
+.config/kingsoft/
+.config/libreoffice/
+.config/GIMP/
+.config/VirtualBox/
+.config/winboat/
+.config/menus/
+.config/akonadi*
+.config/kmail*
+.config/korganizerrc
+.config/kaddressbookrc
+.config/emailidentities
+.config/emaildefaults
+.config/defaultcalendarrc
+.config/eventviewsrc
+.config/specialmailcollectionsrc
+.config/print-manager
+.config/pulse/
+.config/procps/
+.config/vlc/
+.config/fcitx/
+.config/fcitx5/
+.config/ibus/
+.config/go/telemetry/
+.config/autostart/
+.config/com.dbx.app/
+.local/share/akonadi*
+.local/share/local-mail/
+.local/share/baloo/
+.local/share/klipper/
+.local/share/wallpapers/
+.local/share/nvim/
+.local/share/pnpm/
+.local/share/uv/
+.local/share/flatpak/
+.local/share/v2rayN/
+.local/share/winboat/
+.mozilla/
+.m2/
+.gradle/
+.npm/
+.rustup/
+.nimble/
+.android/
+.var/
+.wine/
+.xwechat/
+.zdxlz/
+.rappel/
+.duckdb/
+.java/
+.eclipse/
+.lemminx/
+.emacs.d/
+.icons/
+.themes/
+.vim/
+.tmux/plugins/
+.dsh/
+.dsh-tui/
+.dbx/
+.dbx-web/
+.opencode2dsh/
+Postman/
+VMs/
+iso/
+go/
+workspace/

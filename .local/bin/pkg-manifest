@@ -1,0 +1,316 @@
+#!/usr/bin/env bash
+# ============================================================================
+# pkg-manifest —— 导出 / 恢复各包管理器的软件清单，用于多 PC 同步
+#
+#   apt | cargo | npm | flatpak
+#
+# 清单目录默认为 ~/.config/pkg/manifest，属于 dotfiles 仓库的一部分，
+# 通过 dotfiles 同步到其它 PC 后用 `pkg-manifest apply` 还原。
+#
+# 每个管理器可另建一个 <mgr>.local 文件（**不要提交**），逐行列出只属于
+# 本机的包（例如显卡驱动、微码、特定硬件工具），导出与比较时都会被排除。
+#
+# 用法见 `pkg-manifest --help`
+# ============================================================================
+set -euo pipefail
+
+MANIFEST_DIR="${PKG_MANIFEST_DIR:-$HOME/.config/pkg/manifest}"
+MANAGERS=(apt cargo npm flatpak)
+
+DRY_RUN=0        # apply 时只打印命令
+APT_ALL=0        # apt 导出时是否保留 required/important 的基础包
+APT_UPDATE=1     # apply apt 前是否先 apt-get update
+
+# 非交互式 shell 里 cargo / npm / flatpak 也要能找到
+export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$HOME/.local/share/pnpm/bin:$PATH"
+
+say()  { printf '%s\n' "$*"; }
+warn() { printf 'pkg-manifest: %s\n' "$*" >&2; }
+die()  { warn "$*"; exit 1; }
+have() { command -v "$1" >/dev/null 2>&1; }
+
+# 去掉注释行/空行与行尾空白（保留制表符，flatpak 用两列）
+strip_comments() { sed -e 's/#.*//' -e 's/[[:space:]]*$//' -e '/^[[:space:]]*$/d'; }
+sorted()         { LC_ALL=C sort -u; }
+keys()           { cut -f1; }          # 取第一列：普通管理器就是整行
+
+TMPDIR_RUN="$(mktemp -d)"
+trap 'rm -rf "$TMPDIR_RUN"' EXIT
+
+exclude_file() { printf '%s/%s.local\n' "$MANIFEST_DIR" "$1"; }
+
+# 按 <mgr>.local 过滤（比较第一列）
+apply_excludes() {
+    local f; f="$(exclude_file "$1")"
+    if [ -f "$f" ]; then
+        awk -F'\t' -v exfile="$f" '
+            BEGIN {
+                while ((getline line < exfile) > 0) {
+                    sub(/#.*/, "", line)
+                    gsub(/^[ \t]+|[ \t]+$/, "", line)
+                    if (line != "") { split(line, a, "\t"); ex[a[1]] = 1 }
+                }
+            }
+            !($1 in ex) { print }
+        '
+    else
+        cat
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# 本机已安装清单
+# ---------------------------------------------------------------------------
+current_apt() {
+    have apt-mark || return 0
+    if [ "$APT_ALL" = 0 ] && have dpkg-query; then
+        # required/important 是发行版自带的基础包，任何 PC 都有，剔除以减少噪音
+        LC_ALL=C comm -23 \
+            <(apt-mark showmanual 2>/dev/null | LC_ALL=C sort -u) \
+            <(dpkg-query -W -f='${Package}\t${Priority}\n' 2>/dev/null \
+                | awk -F'\t' '$2=="required" || $2=="important" {print $1}' \
+                | LC_ALL=C sort -u)
+    else
+        apt-mark showmanual 2>/dev/null | LC_ALL=C sort -u
+    fi
+}
+
+current_cargo() {
+    have cargo || return 0
+    # `crate v1.2.3:` 顶格为已安装的 crate，缩进行是它带的二进制
+    cargo install --list 2>/dev/null | awk '/^[^[:space:]]/ {print $1}'
+}
+
+current_npm() {
+    have npm || return 0
+    # npm/corepack 由 node 自带，不属于用户安装
+    npm ls -g --depth=0 --parseable 2>/dev/null \
+        | tail -n +2 \
+        | sed 's|.*/node_modules/||' \
+        | grep -vE '^(npm|corepack|pnpm|yarn)$' || true
+}
+
+current_flatpak() {
+    have flatpak || return 0
+    # 两列：应用 ID <TAB> 来源仓库（还原时要指定 remote）
+    flatpak list --app --columns=application,origin 2>/dev/null \
+        | awk -F'\t' 'NF >= 1 && $1 != "" {print $1 "\t" ($2 == "" ? "flathub" : $2)}'
+}
+
+current() {
+    case "$1" in
+        apt)     current_apt ;;
+        cargo)   current_cargo ;;
+        npm)     current_npm ;;
+        flatpak) current_flatpak ;;
+        *)       die "未知包管理器: $1" ;;
+    esac | apply_excludes "$1"
+}
+
+# ---------------------------------------------------------------------------
+# 清单文件
+# ---------------------------------------------------------------------------
+manifest_file() { printf '%s/%s.txt\n' "$MANIFEST_DIR" "$1"; }
+
+manifest_lines() {
+    local f; f="$(manifest_file "$1")"
+    [ -f "$f" ] || return 0
+    strip_comments < "$f"
+}
+
+write_header() {
+    case "$1" in
+        apt)
+            say "# pkg-manifest: apt 手动安装的包"
+            say "# 导出: pkg-manifest export apt     恢复: pkg-manifest apply apt"
+            say "# 已剔除发行版自带的 required/important 基础包（--apt-all 可保留）"
+            ;;
+        cargo)
+            say "# pkg-manifest: cargo install 安装的 crate"
+            say "# 导出: pkg-manifest export cargo   恢复: pkg-manifest apply cargo"
+            ;;
+        npm)
+            say "# pkg-manifest: npm -g 全局包（不含 node 自带的 npm/corepack）"
+            say "# 导出: pkg-manifest export npm     恢复: pkg-manifest apply npm"
+            ;;
+        flatpak)
+            say "# pkg-manifest: flatpak 应用，格式为「应用ID<TAB>来源仓库」"
+            say "# 导出: pkg-manifest export flatpak 恢复: pkg-manifest apply flatpak"
+            ;;
+    esac
+    say "# 只在本机安装的包请写入 $(basename "$(exclude_file "$1")")（该文件不会被提交）"
+}
+
+# ---------------------------------------------------------------------------
+# 子命令
+# ---------------------------------------------------------------------------
+cmd_list() {
+    local m
+    for m in "${TARGETS[@]}"; do
+        say "== $m =="
+        current "$m" | sed 's/\t/  ← /'
+    done
+}
+
+cmd_export() {
+    mkdir -p "$MANIFEST_DIR"
+    local m f n
+    for m in "${TARGETS[@]}"; do
+        f="$(manifest_file "$m")"
+        { write_header "$m"; current "$m"; } > "$f.tmp"
+        mv "$f.tmp" "$f"
+        n="$(manifest_lines "$m" | grep -c . || true)"
+        say "写入 $f  ($n 项)"
+    done
+}
+
+cmd_diff() {
+    local m man cur miss extra rc=0
+    for m in "${TARGETS[@]}"; do
+        man="$TMPDIR_RUN/man.$m"; cur="$TMPDIR_RUN/cur.$m"
+        # 清单侧同样过滤 <mgr>.local，否则本机刻意排除的包会被误判成缺失
+        manifest_lines "$m" | apply_excludes "$m" | keys | sorted > "$man"
+        current "$m" | keys | sorted > "$cur"
+        say "== $m =="
+        miss="$(LC_ALL=C comm -23 "$man" "$cur")"
+        extra="$(LC_ALL=C comm -13 "$man" "$cur")"
+        if [ -n "$miss" ]; then
+            rc=1
+            say "  清单里有、本机未安装（apply 会装这些）:"
+            printf '    %s\n' $miss
+        fi
+        if [ -n "$extra" ]; then
+            say "  本机多出、清单里没有（重新 export 可记录）:"
+            printf '    %s\n' $extra
+        fi
+        if [ -z "$miss$extra" ]; then
+            say "  已同步"
+        fi
+    done
+    # 只在「有缺失项」时返回 1，方便脚本判断
+    return $rc
+}
+
+flatpak_remote() {
+    local app="$1" f; f="$(manifest_file flatpak)"
+    [ -f "$f" ] || { printf 'flathub\n'; return; }
+    awk -F'\t' -v a="$app" '$1 == a {print ($2 == "" ? "flathub" : $2); found=1; exit}
+                             END {if (!found) print "flathub"}' "$f"
+}
+
+maybe() {
+    if [ "$DRY_RUN" = 1 ]; then
+        printf '  [dry-run] %s\n' "$*"
+    else
+        printf '  + %s\n' "$*"
+        "$@"
+    fi
+}
+
+cmd_apply() {
+    local m man miss pkg
+    local -a SUDO=()
+    [ "$(id -u)" -ne 0 ] && SUDO=(sudo)
+
+    for m in "${TARGETS[@]}"; do
+        man="$TMPDIR_RUN/man.$m"
+        # 与 diff 一致：清单侧也要过滤 <mgr>.local
+        manifest_lines "$m" | apply_excludes "$m" | keys | sorted > "$man"
+        current "$m" | keys | sorted > "$TMPDIR_RUN/cur.$m"
+        miss="$(LC_ALL=C comm -23 "$man" "$TMPDIR_RUN/cur.$m")"
+        [ -n "$miss" ] || continue
+
+        say "== $m: 需要安装 $(printf '%s\n' $miss | wc -l) 项 =="
+        case "$m" in
+            apt)
+                if [ "$APT_UPDATE" = 1 ]; then
+                    maybe "${SUDO[@]}" apt-get update
+                fi
+                # shellcheck disable=SC2086
+                maybe "${SUDO[@]}" apt-get install -y $miss
+                ;;
+            cargo)
+                for pkg in $miss; do
+                    maybe cargo install "$pkg"
+                done
+                ;;
+            npm)
+                # shellcheck disable=SC2086
+                maybe npm install -g $miss
+                ;;
+            flatpak)
+                for pkg in $miss; do
+                    maybe flatpak install -y "$(flatpak_remote "$pkg")" "$pkg"
+                done
+                ;;
+        esac
+    done
+}
+
+usage() {
+    cat <<'EOF'
+pkg-manifest —— 包管理器清单同步 (apt / cargo / npm / flatpak)
+
+用法:
+  pkg-manifest export [管理器...]   导出本机清单到 ~/.config/pkg/manifest/
+  pkg-manifest list   [管理器...]   打印本机已安装列表
+  pkg-manifest diff   [管理器...]   对比清单与本机，显示「未安装 / 多出」
+  pkg-manifest apply  [管理器...]   按清单安装缺失的包（apt 会先 update）
+
+  不指定管理器则对全部可用管理器执行。别名: save=export, install=apply, status=diff
+
+选项:
+  -n, --dry-run    apply 只打印命令，不真正执行
+      --apt-all    apt 导出时保留发行版自带的 required/important 基础包
+      --no-update  apply apt 前跳过 apt-get update
+  -h, --help       显示本帮助
+
+环境变量:
+  PKG_MANIFEST_DIR  清单目录，默认 ~/.config/pkg/manifest
+
+文件:
+  <mgr>.txt    随 dotfiles 提交的清单
+  <mgr>.local  仅本机的排除列表（每行一个包名，支持 # 注释），**不要提交**
+
+典型流程:
+  换机后  pkg-manifest diff && pkg-manifest apply
+  装新包后  pkg-manifest export && dotfiles add .config/pkg && dotfiles commit -m "packages"
+EOF
+}
+
+# ---------------------------------------------------------------------------
+# 入口
+# ---------------------------------------------------------------------------
+CMD=""
+TARGETS=()
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -h|--help)   usage; exit 0 ;;
+        -n|--dry-run) DRY_RUN=1 ;;
+        --apt-all)   APT_ALL=1 ;;
+        --no-update) APT_UPDATE=0 ;;
+        -*)          die "未知选项: $1（-h 查看帮助）" ;;
+        *)
+            if [ -z "$CMD" ]; then CMD="$1"; else TARGETS+=("$1"); fi
+            ;;
+    esac
+    shift
+done
+
+case "${CMD:-export}" in
+    export|save|dump)   CMD=cmd_export ;;
+    list|ls)            CMD=cmd_list ;;
+    diff|status)        CMD=cmd_diff ;;
+    apply|install|sync) CMD=cmd_apply ;;
+    *)                  die "未知子命令: $CMD（-h 查看帮助）" ;;
+esac
+
+[ ${#TARGETS[@]} -eq 0 ] && TARGETS=("${MANAGERS[@]}")
+for m in "${TARGETS[@]}"; do
+    case " ${MANAGERS[*]} " in
+        *" $m "*) ;;
+        *) die "不支持的包管理器: $m（支持: ${MANAGERS[*]}）" ;;
+    esac
+done
+
+$CMD

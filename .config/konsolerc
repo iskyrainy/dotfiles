@@ -1,0 +1,15 @@
+[Desktop Entry]
+DefaultProfile=配置方案 1.profile
+
+[General]
+ConfigVersion=1
+
+[KonsoleWindow]
+RemoveWindowTitleBarAndFrame=true
+
+[Notification Messages]
+ApplicationLanguageChangedWarning=false
+CloseAllEmptyTabs=true
+
+[UiSettings]
+ColorScheme=

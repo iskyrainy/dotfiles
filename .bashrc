@@ -165,3 +165,11 @@ fi
 fortune | cowsay -f tux | lolcat
 export PATH="$HOME/.jenv/bin:$PATH"
 eval "$(jenv init -)"
+
+# pnpm
+export PNPM_HOME='/home/wangnan/.local/share/pnpm'
+case ":$PATH:" in
+  ":$PNPM_HOME/bin:"*) ;;
+  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
+esac
+# pnpm end
