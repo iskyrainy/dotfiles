@@ -162,9 +162,10 @@ if [ -f ~/.bashrc.local ]; then
     source ~/.bashrc.local
 fi
 
-fortune | cowsay -f tux | lolcat
 export PATH="$HOME/.jenv/bin:$PATH"
 eval "$(jenv init -)"
+
+eval "$(fnm env --use-on-cd --shell bash)"
 
 # pnpm
 export PNPM_HOME='/home/wangnan/.local/share/pnpm'
@@ -173,3 +174,5 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME/bin:$PATH" ;;
 esac
 # pnpm end
+
+fortune | cowsay -f tux | lolcat
